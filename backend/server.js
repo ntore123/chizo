@@ -22,7 +22,7 @@ app.use(cors());
 app.use(express.json());
 
 // Connect to MongoDB
-mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/smartpark')
+mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/pssms')
   .then(() => console.log('MongoDB connected'))
   .catch(err => console.error('MongoDB connection error:', err));
 

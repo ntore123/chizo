@@ -110,8 +110,8 @@ const Cars = () => {
           <Table columns={columns} data={cars} />
         )}
       </Card>
-      <Modal isOpen={isModalOpen} onClose={handleCloseModal} title="Add New Car">
-        <form id="modal-form" onSubmit={handleFormSubmit}>
+      <Modal isOpen={isModalOpen} onClose={handleCloseModal} title="Add New Car" footer={false}>
+        <form id="modal-form" onSubmit={handleFormSubmit} className="space-y-2">
           <Input
             label="Plate Number"
             name="plateNumber"
