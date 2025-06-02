@@ -27,19 +27,27 @@ exports.getCar = async (req, res) => {
 exports.createCar = async (req, res) => {
   try {
     const { plateNumber, driverName, phoneNumber } = req.body;
-    
-    // Check if car already exists
-    const existingCar = await Car.findOne({ plateNumber });
-    if (existingCar) {
-      return res.status(400).json({ message: 'Car already exists' });
+    // Plate number: Rwandan format e.g. 'RAB123A' or 'RAD456B'
+    const plateRegex = /^RA[BCDEFGHJKLNPQRSTUVWXZ]\d{3}[A-Z]$/i;
+    if (!plateRegex.test(plateNumber)) {
+      return res.status(400).json({ message: 'Plate number must match the Rwandan format (e.g. RAB123A)' });
     }
-    
+    if (!driverName || !/^[A-Za-z\s'-]{2,}$/.test(driverName)) {
+      return res.status(400).json({ message: 'Enter a valid driver name (letters, spaces, apostrophes, hyphens)' });
+    }
+    if (!/^0[7][2389]\d{7}$/.test(phoneNumber)) {
+      return res.status(400).json({ message: 'Phone number must be a valid Rwandan number (e.g. 07XXXXXXXX)' });
+    }
+    // Check if car already exists
+    const existingCar = await Car.findOne({ plateNumber: plateNumber.toUpperCase() });
+    if (existingCar) {
+      return res.status(400).json({ message: 'A car with this plate number already exists.' });
+    }
     const newCar = new Car({
-      plateNumber,
+      plateNumber: plateNumber.toUpperCase(),
       driverName,
       phoneNumber
     });
-    
     const savedCar = await newCar.save();
     res.status(201).json(savedCar);
   } catch (error) {

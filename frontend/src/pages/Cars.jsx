@@ -57,20 +57,41 @@ const Cars = () => {
   const handleFormChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
+
+  const validateForm = () => {
+    let valid = true;
+    let errorMsg = '';
+    // Plate number: Rwandan format e.g. 'RAB123A' or 'RAD456B'
+    const plateRegex = /^RA[BCDEFGHJKLNPQRSTUVWXZ]\d{3}[A-Z]$/i;
+    if (!plateRegex.test(form.plateNumber)) {
+      errorMsg = 'Plate number must match the Rwandan format (e.g. RAB123A)';
+      valid = false;
+    } else if (!form.driverName.trim() || !/^[A-Za-z\s'-]{2,}$/.test(form.driverName)) {
+      errorMsg = 'Enter a valid driver name (letters, spaces, apostrophes, hyphens)';
+      valid = false;
+    } else if (!/^0[7][2389]\d{7}$/.test(form.phoneNumber)) {
+      errorMsg = 'Phone number must be a valid Rwandan number (e.g. 07XXXXXXXX)';
+      valid = false;
+    }
+    setFormError(errorMsg);
+    return valid;
+  };
+
   const handleFormSubmit = async (e) => {
     e.preventDefault();
     setFormError('');
-    if (!form.plateNumber || !form.driverName || !form.phoneNumber) {
-      setFormError('All fields are required.');
-      return;
-    }
+    if (!validateForm()) return;
     setSubmitting(true);
     try {
       await carAPI.create(form);
       setIsModalOpen(false);
       fetchCars();
     } catch (error) {
-      setFormError('Failed to add car.');
+      if (error.response && error.response.data && error.response.data.message && error.response.data.message.includes('already exists')) {
+        setFormError('A car with this plate number already exists.');
+      } else {
+        setFormError('Failed to add car.');
+      }
     } finally {
       setSubmitting(false);
     }
